@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+use App\Http\Requests\RegisterRequest;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
@@ -58,7 +59,7 @@ class RegisterController extends Controller
         return view('auth.register.register', compact('subjects'));
     }
 
-    public function registerPost(Request $request)
+    public function registerPost(RegisterRequest $request)
     {
         DB::beginTransaction();
         try{
@@ -77,7 +78,7 @@ class RegisterController extends Controller
             'under_name_kana' => ['required', 'string', 'max:30', 'regex:/^[ア-ン゛゜ァ-ォャ-ョー]+$/u'],
             'mail_address' => ['required', 'email', 'unique:users', 'max:100'],
             'sex' => ['required'],
-            // 'birth_day' => ['required','date', 'after_or_equal:2000-1-1', 'before:today' ],
+            'birth_day' => ['required','date', 'after_or_equal:2000-1-1', 'before:today' ],
             'role' => ['required'],
             'password' => ['required', 'min:8', 'max:20', 'confirmed' ],
         ]);
@@ -98,13 +99,13 @@ class RegisterController extends Controller
 
             ]);
 
-                //                     if ($validator->fails()) {
-                // return redirect('/register')
-                //     ->withErrors($validator)
-                //     ->withInput();
-                // }
+                                    if ($validator->fails()) {
+                return redirect('/register')
+                    ->withErrors($validator)
+                    ->withInput();
+                }
             $user = User::findOrFail($user_get->id);
-            // $user->subjects()->attach($subjects);
+            $user->subjects()->attach($subjects);
             DB::commit();
             return view('auth.login');
         }catch(\Exception $e){
